@@ -1,0 +1,33 @@
+services:
+
+  personal_finance_tracking_db:
+    image: timescale/timescaledb-ha:pg16
+    container_name: personal_finance_tracking_db
+    environment:
+      POSTGRES_DB: personal_finance_tracking_db
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    networks:
+      - my-network
+
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: release_image
+    environment:
+      POSTGRES_HOST: personal_finance_tracking_db
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    depends_on:
+      - personal_finance_tracking_db
+    ports:
+      - "8080:8080"
+    networks:
+      - my-network
+
+networks:
+  my-network:
