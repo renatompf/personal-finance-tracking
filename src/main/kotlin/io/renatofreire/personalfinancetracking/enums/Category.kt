@@ -9,6 +9,7 @@ enum class Category {
     HEALTH,
     EDUCATION,
     INCOME,
-    OTHER
+    OTHER,
+    ALL
 
 }

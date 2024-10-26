@@ -18,8 +18,8 @@ import java.util.UUID
 
 @Service
 class TransactionService(
-    val userRepository: UserRepository,
-    val transactionRepository: TransactionRepository
+    private val userRepository: UserRepository,
+    private val transactionRepository: TransactionRepository
 ){
 
     fun getAllTransactions(userDetails: UserDetails, pageable: Pageable): Page<TransactionOutDto> {

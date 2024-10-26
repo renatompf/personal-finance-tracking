@@ -1,9 +1,10 @@
 CREATE TABLE budget
 (
-    id       UUID           NOT NULL,
-    "limit"  DECIMAL(10, 2) NOT NULL,
-    category VARCHAR(50)    NOT NULL,
-    user_id  UUID           NOT NULL,
+    id          UUID           NOT NULL,
+    "limit"     DECIMAL(10, 2) NOT NULL,
+    category    VARCHAR(50)    NOT NULL,
+    time_period VARCHAR(50)    NOT NULL,
+    user_id     UUID           NOT NULL,
     CONSTRAINT pk_budget PRIMARY KEY (id)
 );
 

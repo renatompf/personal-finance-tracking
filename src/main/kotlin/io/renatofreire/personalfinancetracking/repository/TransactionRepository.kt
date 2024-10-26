@@ -7,13 +7,15 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import java.time.Instant
-import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 interface TransactionRepository : JpaRepository<Transaction, TransactionPK> {
 
     @Query("select t from Transaction t where t.user.id = :userId order by t.pk.date desc")
     fun findAllByUserId(userId: UUID, pageable: Pageable) : Page<Transaction>
+
+    @Query("select t from Transaction t where t.user.id = :userId order by t.pk.date desc")
+    fun findAllByUserId(userId: UUID) : List<Transaction>
 
     @Query("select t from Transaction t where t.pk.id = :id")
     fun findById(id: UUID): Transaction?
@@ -21,6 +23,7 @@ interface TransactionRepository : JpaRepository<Transaction, TransactionPK> {
     @Query("select t from Transaction t where t.pk.date >= :startDate and t.pk.date <= :endDate order by t.pk.date desc")
     fun findAllBetweenDates(startDate: Instant, endDate: Instant, pageable: Pageable): Page<Transaction>
 
-
+    @Query("select t from Transaction t where t.pk.date >= :startDate and t.pk.date <= :endDate order by t.pk.date desc")
+    fun findAllBetweenDates(startDate: Instant, endDate: Instant): List<Transaction>
 
 }
