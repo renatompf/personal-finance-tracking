@@ -1,10 +1,12 @@
 package io.renatofreire.personalfinancetracking.service
 
+import io.renatofreire.personalfinancetracking.dto.summary.TransactionMonthlySummary
 import io.renatofreire.personalfinancetracking.dto.transaction.TransactionInDto
 import io.renatofreire.personalfinancetracking.dto.transaction.TransactionOutDto
 import io.renatofreire.personalfinancetracking.model.Transaction
 import io.renatofreire.personalfinancetracking.model.TransactionPK
 import io.renatofreire.personalfinancetracking.model.User
+import io.renatofreire.personalfinancetracking.repository.TransactionMonthlySummaryRepository
 import io.renatofreire.personalfinancetracking.repository.TransactionRepository
 import io.renatofreire.personalfinancetracking.repository.UserRepository
 import jakarta.persistence.EntityNotFoundException
@@ -19,7 +21,8 @@ import java.util.UUID
 @Service
 class TransactionService(
     private val userRepository: UserRepository,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val transactionMonthlySummaryRepository: TransactionMonthlySummaryRepository
 ){
 
     fun getAllTransactions(userDetails: UserDetails, pageable: Pageable): Page<TransactionOutDto> {
@@ -90,5 +93,12 @@ class TransactionService(
 
         transactionRepository.delete(transaction)
     }
+
+    fun getMonthlySummary(userDetails: UserDetails): List<TransactionMonthlySummary> {
+        val user : User = userRepository.findByEmail(userDetails.username) ?: throw EntityNotFoundException("User not found")
+
+        return transactionMonthlySummaryRepository.findMonthlySummaryByUserId(user.id!!)
+    }
+
 
 }

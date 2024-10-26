@@ -1,5 +1,6 @@
 package io.renatofreire.personalfinancetracking.controller
 
+import io.renatofreire.personalfinancetracking.dto.summary.TransactionMonthlySummary
 import io.renatofreire.personalfinancetracking.dto.transaction.TransactionInDto
 import io.renatofreire.personalfinancetracking.dto.transaction.TransactionOutDto
 import io.renatofreire.personalfinancetracking.service.TransactionService
@@ -46,5 +47,9 @@ class TransactionController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
     }
 
+    @GetMapping("/monthly-summary")
+    fun getMonthlySummary(@AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<List<TransactionMonthlySummary>> {
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.getMonthlySummary(userDetails))
+    }
 
 }
