@@ -34,7 +34,9 @@ class AuthenticationService(
 ) {
 
     fun register(registrationRequest: RegistrationRequest): AuthenticationResponse {
-        val user: User = userRepository.findByEmail(registrationRequest.email) ?: throw EntityExistsException("Email already taken")
+        if(userRepository.existsByEmail(registrationRequest.email)) {
+            throw EntityExistsException("Email already taken")
+        }
 
         val newUser: User = User(
             name = registrationRequest.name,
