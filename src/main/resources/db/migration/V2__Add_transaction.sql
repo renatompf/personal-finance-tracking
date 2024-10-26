@@ -1,13 +1,10 @@
-CREATE TABLE transaction
-(
-    id          UUID                        NOT NULL,
-    amount      DECIMAL(10, 2)              NOT NULL,
-    category    VARCHAR(50)                 NOT NULL,
-    description TEXT,
-    date        TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    user_id     UUID                        NOT NULL,
-    CONSTRAINT pk_transaction PRIMARY KEY (id)
+CREATE TABLE transaction (
+                             id UUID NOT NULL,
+                             date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                             user_id UUID,
+                             amount NUMERIC(10, 2),
+                             category VARCHAR(50),
+                             description TEXT,
+                             PRIMARY KEY (id, date),
+                             CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
 );
-
-ALTER TABLE transaction
-    ADD CONSTRAINT FK_TRANSACTION_ON_USER FOREIGN KEY (user_id) REFERENCES users (id);
