@@ -1,6 +1,6 @@
 package io.renatofreire.personalfinancetracking.service
 
-import io.renatofreire.personalfinancetracking.dto.summary.TransactionMonthlySummary
+import io.renatofreire.personalfinancetracking.dto.summary.TransactionMonthlySummaryDto
 import io.renatofreire.personalfinancetracking.dto.transaction.TransactionInDto
 import io.renatofreire.personalfinancetracking.dto.transaction.TransactionOutDto
 import io.renatofreire.personalfinancetracking.model.Transaction
@@ -16,7 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.ZoneId
-import java.util.UUID
+import java.util.*
 
 @Service
 class TransactionService(
@@ -31,6 +31,7 @@ class TransactionService(
 
         return transactionRepository.findAllByUserId(user.id!!, pageable).map { transaction ->
             TransactionOutDto(
+                id = transaction.pk.id,
                 amount = transaction.amount,
                 category = transaction.category,
                 description = transaction.description,
@@ -52,6 +53,7 @@ class TransactionService(
         }
 
         return TransactionOutDto(
+            id = transaction.pk.id,
             amount = transaction.amount,
             category = transaction.category,
             description = transaction.description,
@@ -74,6 +76,7 @@ class TransactionService(
         )
 
         return TransactionOutDto(
+            id = transaction.pk.id,
             amount = transaction.amount,
             category = transaction.category,
             description = transaction.description,
@@ -94,10 +97,19 @@ class TransactionService(
         transactionRepository.delete(transaction)
     }
 
-    fun getMonthlySummary(userDetails: UserDetails): List<TransactionMonthlySummary> {
+    fun getMonthlySummary(userDetails: UserDetails): List<TransactionMonthlySummaryDto> {
         val user : User = userRepository.findByEmail(userDetails.username) ?: throw EntityNotFoundException("User not found")
 
         return transactionMonthlySummaryRepository.findMonthlySummaryByUserId(user.id!!)
+            .map { t ->
+                TransactionMonthlySummaryDto(
+                    userId = t.userId!!,
+                    date = LocalDate.ofInstant(t.month!!, ZoneId.of("UTC")),
+                    category = t.category!!,
+                    totalIncome = t.totalIncome!!,
+                    totalExpenses = t.totalExpenses!!
+                )
+        }
     }
 
 

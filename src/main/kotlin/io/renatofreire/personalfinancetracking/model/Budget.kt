@@ -3,6 +3,7 @@ package io.renatofreire.personalfinancetracking.model
 import io.renatofreire.personalfinancetracking.enums.Category
 import io.renatofreire.personalfinancetracking.enums.TimePeriod
 import jakarta.persistence.*
+import org.hibernate.annotations.UuidGenerator
 import java.math.BigDecimal
 import java.util.*
 
@@ -15,7 +16,7 @@ class Budget (
     @Column(name = "id")
     var id: UUID? = null,
 
-    @Column(name = "limit", nullable = false, precision = 10, scale = 2)
+    @Column(name = "\"limit\"", nullable = false, precision = 10, scale = 2)
     var limit: BigDecimal,
 
     @Enumerated(EnumType.STRING)
@@ -24,7 +25,7 @@ class Budget (
 
     @Enumerated(EnumType.STRING)
     @Column(name = "time_period", nullable = false, length = 50)
-    val timePeriod: TimePeriod, // Enum for MONTHLY or ANNUALLY
+    var timePeriod: TimePeriod, // Enum for MONTHLY or ANNUALLY
 
     @ManyToOne(targetEntity = User::class, cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

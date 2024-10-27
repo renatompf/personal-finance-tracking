@@ -1,25 +1,22 @@
 package io.renatofreire.personalfinancetracking.repository
 
-import io.renatofreire.personalfinancetracking.dto.summary.TransactionMonthlySummary
+import io.renatofreire.personalfinancetracking.model.TransactionMonthlySummary
+import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface TransactionMonthlySummaryRepository {
+interface TransactionMonthlySummaryRepository : JpaRepository<TransactionMonthlySummary, UUID> {
 
-    @Query("""
-        SELECT new io.renatofreire.personalfinancetracking.dto.summary.TransactionMonthlySummary(
-            to_char(month, 'YYYY-MM') AS date,
-            user_id AS userId,
-            category,
-            SUM(total_income) AS totalIncome,
-            SUM(total_expenses) AS totalExpenses
-        )
-        FROM transaction_monthly_summary
-        WHERE user_id = :userId
-        GROUP BY date, user_id, category
-        """)
+    @Query(
+        """
+        SELECT t
+        FROM TransactionMonthlySummary t
+        WHERE t.userId = :userId
+        GROUP BY t.month, t.userId, t.category, t.totalExpenses, t.totalIncome
+        """
+    )
     fun findMonthlySummaryByUserId(@Param("userId") userId: UUID): List<TransactionMonthlySummary>
 }

@@ -22,19 +22,18 @@ class BudgetService(
     fun addBudget(userDetails: UserDetails, budgetRequest: BudgetCreationRequest): BudgetOutDto {
         val user = userRepository.findByEmail(userDetails.username) ?: throw EntityNotFoundException("User not found")
 
-        var budget = Budget(
+        val budget = Budget(
             limit = budgetRequest.limit,
             category = budgetRequest.category,
             user = user,
             timePeriod = budgetRequest.timePeriod
         )
 
-        // Save the budget in the database
-        budget = budgetRepository.save(budget)
+        val save = budgetRepository.save(budget)
 
         return BudgetOutDto(
-            limit = budget.limit,
-            category = budget.category,
+            limit = save.limit,
+            category = save.category,
         )
     }
 
