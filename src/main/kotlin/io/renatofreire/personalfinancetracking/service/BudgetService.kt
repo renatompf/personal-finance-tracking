@@ -41,7 +41,7 @@ class BudgetService(
     fun calculateRemainingBudget(userDetails: UserDetails): RemainingBudgetDto {
         val user = userRepository.findByEmail(userDetails.username) ?: throw EntityNotFoundException("User not found")
 
-        val monthlyBudgets = budgetRepository.findAllByUser(user)
+        val monthlyBudgets = budgetRepository.findAllByUserId(user.id!!)
 
         val totalLimit = monthlyBudgets.sumOf { it.limit }
 

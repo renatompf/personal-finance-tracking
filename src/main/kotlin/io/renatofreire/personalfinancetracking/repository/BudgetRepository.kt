@@ -10,10 +10,10 @@ import java.util.UUID
 
 interface BudgetRepository : JpaRepository<Budget, UUID> {
 
-    @Query("select b from Budget b where b.id  = :id")
-    fun findAllByUser(user : User): List<Budget>
+    @Query("select b from Budget b where b.user.id  = :userId")
+    fun findAllByUserId(userId : UUID): List<Budget>
 
-    @Query("select b from Budget b where b.id  = :id")
-    fun findAllByUser(user : User, pageable: Pageable): Page<Budget>
+    @Query("select b from Budget b where b.user.id  = :userId")
+    fun findAllByUser(userId : UUID, pageable: Pageable): Page<Budget>
 
 }
