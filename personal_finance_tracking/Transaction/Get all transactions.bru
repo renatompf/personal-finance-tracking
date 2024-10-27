@@ -1,0 +1,23 @@
+meta {
+  name: Get all transactions
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/transactions
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyZW5hdG9AZ2l0aHViLmNvbSIsImlhdCI6MTczMDAzMjc5MywiZXhwIjoxNzMwMTE5MTkzfQ.jkt2oHyKSyYYeu27jCUZoBFaKpLZBZVRPXBgg-7yNO8
+}
+
+body:json {
+  {
+    "budget": 1000.00,
+    "category": "ALL",
+    "timePeriod": "MONTHLY"
+  }
+}

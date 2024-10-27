@@ -1,0 +1,23 @@
+meta {
+  name: delete transaction by id
+  type: http
+  seq: 4
+}
+
+delete {
+  url: http://localhost:8080/transactions/ccdb1f6b-1834-4aae-8e4c-5fcf8c1b8b6f
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyZW5hdG9AZ2l0aHViLmNvbSIsImlhdCI6MTczMDAzMjc5MywiZXhwIjoxNzMwMTE5MTkzfQ.jkt2oHyKSyYYeu27jCUZoBFaKpLZBZVRPXBgg-7yNO8
+}
+
+body:json {
+  {
+    "budget": 1000.00,
+    "category": "ALL",
+    "timePeriod": "MONTHLY"
+  }
+}

@@ -1,0 +1,23 @@
+meta {
+  name: add transaction
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/transactions
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyZW5hdG9AZ2l0aHViLmNvbSIsImlhdCI6MTczMDAzMjc5MywiZXhwIjoxNzMwMTE5MTkzfQ.jkt2oHyKSyYYeu27jCUZoBFaKpLZBZVRPXBgg-7yNO8
+}
+
+body:json {
+  {
+    "amount": -500.50,
+    "category": "INCOME",
+    "description": "Pagou o que devia"
+  }
+}

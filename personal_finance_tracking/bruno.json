@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "personal_finance_tracking",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
