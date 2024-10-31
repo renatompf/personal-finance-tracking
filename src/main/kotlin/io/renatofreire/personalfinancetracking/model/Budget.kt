@@ -1,10 +1,9 @@
 package io.renatofreire.personalfinancetracking.model
 
 import io.renatofreire.personalfinancetracking.enums.Category
-import io.renatofreire.personalfinancetracking.enums.TimePeriod
 import jakarta.persistence.*
-import org.hibernate.annotations.UuidGenerator
 import java.math.BigDecimal
+import java.time.Instant
 import java.util.*
 
 @Entity
@@ -23,9 +22,8 @@ class Budget (
     @Column(name = "category", nullable = false, length = 50)
     var category: Category,
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "time_period", nullable = false, length = 50)
-    var timePeriod: TimePeriod, // Enum for MONTHLY or ANNUALLY
+    @Column(name = "budget_date", nullable = false)
+    var budgetDate: Instant,
 
     @ManyToOne(targetEntity = User::class, cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

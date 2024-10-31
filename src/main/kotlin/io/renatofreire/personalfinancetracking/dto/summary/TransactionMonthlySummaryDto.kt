@@ -2,13 +2,12 @@ package io.renatofreire.personalfinancetracking.dto.summary
 
 import io.renatofreire.personalfinancetracking.enums.Category
 import java.math.BigDecimal
-import java.time.LocalDate
-import java.util.*
+import java.time.Instant
 
 data class TransactionMonthlySummaryDto(
-    val userId: UUID,
-    val date: LocalDate,
+    val month: Instant,
     val category: Category,
     val totalIncome: BigDecimal,
-    val totalExpenses: BigDecimal
+    val totalExpenses: BigDecimal,
+    val remainingBudget: BigDecimal
 )

@@ -7,10 +7,11 @@ import io.renatofreire.personalfinancetracking.model.Budget
 import io.renatofreire.personalfinancetracking.repository.BudgetRepository
 import io.renatofreire.personalfinancetracking.repository.TransactionRepository
 import io.renatofreire.personalfinancetracking.repository.UserRepository
+import jakarta.persistence.EntityExistsException
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
+import java.time.Instant
 
 @Service
 class BudgetService(
@@ -22,11 +23,16 @@ class BudgetService(
     fun addBudget(userDetails: UserDetails, budgetRequest: BudgetCreationRequest): BudgetOutDto {
         val user = userRepository.findByEmail(userDetails.username) ?: throw EntityNotFoundException("User not found")
 
+        val existsByUserIdAndBudgetTime = budgetRepository.existsByUserIdAndBudgetTime(user.id!!)
+        if(existsByUserIdAndBudgetTime) {
+            throw EntityExistsException("Bidget already set for this month")
+        }
+
         val budget = Budget(
             limit = budgetRequest.limit,
             category = budgetRequest.category,
             user = user,
-            timePeriod = budgetRequest.timePeriod
+            budgetDate = Instant.now(),
         )
 
         val save = budgetRepository.save(budget)
@@ -40,18 +46,16 @@ class BudgetService(
     fun calculateRemainingBudget(userDetails: UserDetails): RemainingBudgetDto {
         val user = userRepository.findByEmail(userDetails.username) ?: throw EntityNotFoundException("User not found")
 
-        val monthlyBudgets = budgetRepository.findAllByUserId(user.id!!)
+        val monthlyBudget = budgetRepository.findBudgetForCurrentMonth(user.id!!) ?: throw EntityNotFoundException("Budget not found")
 
-        val totalLimit = monthlyBudgets.sumOf { it.limit }
-
-        val transactions = transactionRepository.findAllByUserId(user.id!!)
+        val transactions = transactionRepository.findAllByUserIdForCurrentMonth(user.id!!)
 
         val totalSpending = transactions.sumOf { it.amount }
 
-        val remainingBudget = totalLimit.subtract(totalSpending)
+        val remainingBudget = monthlyBudget.limit.subtract(totalSpending)
 
         return RemainingBudgetDto(
-            totalLimit,
+            monthlyBudget.limit,
             totalSpending,
             remainingBudget,
         )

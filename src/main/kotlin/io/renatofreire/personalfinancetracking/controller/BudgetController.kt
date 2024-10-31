@@ -23,7 +23,7 @@ class BudgetController(
     }
 
     @GetMapping("/remaining")
-    fun getRemainingBudget(@AuthenticationPrincipal userDetails: UserDetails, ): ResponseEntity<RemainingBudgetDto> {
+    fun getRemainingBudget(@AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<RemainingBudgetDto> {
         return ResponseEntity.status(HttpStatus.OK).body(budgetService.calculateRemainingBudget(userDetails))
     }
 

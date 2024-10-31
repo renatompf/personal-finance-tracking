@@ -13,7 +13,7 @@ import java.util.*
 @Repository
 interface TransactionRepository : JpaRepository<Transaction, TransactionPK> {
 
-    @Query("select t from Transaction t where t.user.id = :userId order by t.pk.date desc")
+    @Query("select t from Transaction t where t.user.id = :userId")
     fun findAllByUserId(userId: UUID, pageable: Pageable) : Page<Transaction>
 
     @Query("select t from Transaction t where t.user.id = :userId order by t.pk.date desc")
@@ -21,6 +21,15 @@ interface TransactionRepository : JpaRepository<Transaction, TransactionPK> {
 
     @Query("select t from Transaction t where t.pk.id = :id")
     fun findById(id: UUID): Transaction?
+
+    @Query("""
+        select t
+        from Transaction t 
+        where t.user.id = :userId
+        AND t.pk.date >= FUNCTION('date_trunc', 'MONTH', CURRENT_TIMESTAMP) 
+        AND b.t.pk.date < FUNCTION('date_trunc', 'MONTH', CURRENT_TIMESTAMP) + INTERVAL '1 month'
+        """)
+    fun findAllByUserIdForCurrentMonth(userId: UUID): List<Transaction>
 
     @Query("select t from Transaction t where t.pk.date >= :startDate and t.pk.date <= :endDate order by t.pk.date desc")
     fun findAllBetweenDates(startDate: Instant, endDate: Instant, pageable: Pageable): Page<Transaction>

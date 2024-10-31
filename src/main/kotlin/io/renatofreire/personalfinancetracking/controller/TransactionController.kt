@@ -3,6 +3,7 @@ package io.renatofreire.personalfinancetracking.controller
 import io.renatofreire.personalfinancetracking.dto.summary.TransactionMonthlySummaryDto
 import io.renatofreire.personalfinancetracking.dto.transaction.TransactionInDto
 import io.renatofreire.personalfinancetracking.dto.transaction.TransactionOutDto
+import io.renatofreire.personalfinancetracking.enums.Category
 import io.renatofreire.personalfinancetracking.service.TransactionService
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
@@ -11,13 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @RestController
@@ -47,9 +42,13 @@ class TransactionController(
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build()
     }
 
-    @GetMapping("/monthly-summary")
-    fun getMonthlySummary(@AuthenticationPrincipal userDetails: UserDetails): ResponseEntity<List<TransactionMonthlySummaryDto>> {
-        return ResponseEntity.status(HttpStatus.OK).body(transactionService.getMonthlySummary(userDetails))
+    @GetMapping("/summary/monthly")
+    fun getMonthlySummary(@AuthenticationPrincipal userDetails: UserDetails, @RequestParam(name = "category", required = false) category: Category?): ResponseEntity<List<TransactionMonthlySummaryDto>> {
+        return if (category == null) {
+            ResponseEntity.status(HttpStatus.OK).body(transactionService.getMonthlySummary(userDetails))
+        } else {
+            ResponseEntity.status(HttpStatus.OK).body(transactionService.getMonthlySummaryByCategory(userDetails, category))
+        }
     }
 
 }
