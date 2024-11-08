@@ -1,6 +1,5 @@
 package io.renatofreire.personalfinancetracking.model
 
-import io.renatofreire.personalfinancetracking.enums.Category
 import jakarta.persistence.*
 import java.math.BigDecimal
 import java.time.Instant
@@ -17,10 +16,6 @@ class Budget (
 
     @Column(name = "\"limit\"", nullable = false, precision = 10, scale = 2)
     var limit: BigDecimal,
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "category", nullable = false, length = 50)
-    var category: Category,
 
     @Column(name = "budget_date", nullable = false)
     var budgetDate: Instant,

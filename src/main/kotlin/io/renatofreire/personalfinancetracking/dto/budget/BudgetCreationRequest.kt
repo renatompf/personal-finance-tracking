@@ -1,7 +1,6 @@
 package io.renatofreire.personalfinancetracking.dto.budget
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import io.renatofreire.personalfinancetracking.enums.Category
 import io.renatofreire.personalfinancetracking.enums.TimePeriod
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
@@ -13,10 +12,6 @@ data class BudgetCreationRequest (
     @Min(0)
     @JsonProperty(value = "budget", required = true)
     val limit: BigDecimal,
-
-    @NotNull
-    @JsonProperty(value = "category", required = true)
-    val category: Category,
 
     @NotNull
     @JsonProperty(value = "timePeriod", required = true)

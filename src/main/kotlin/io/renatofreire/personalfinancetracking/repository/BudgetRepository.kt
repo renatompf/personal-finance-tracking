@@ -1,6 +1,5 @@
 package io.renatofreire.personalfinancetracking.repository
 
-import io.renatofreire.personalfinancetracking.enums.Category
 import io.renatofreire.personalfinancetracking.model.Budget
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -16,19 +15,21 @@ interface BudgetRepository : JpaRepository<Budget, UUID> {
     @Query("select b from Budget b where b.user.id  = :userId")
     fun findAllByUser(userId : UUID, pageable: Pageable): Page<Budget>
 
-    @Query("SELECT count(b) > 0 FROM Budget b WHERE b.user.id = :userId AND FUNCTION('date_trunc', 'MONTH', b.budgetDate) = FUNCTION('date_trunc', 'MONTH', NOW())")
+    @Query("""
+        SELECT count(b) > 0 
+        FROM Budget b 
+        WHERE b.user_id = :userId 
+        AND date_trunc('MONTH', b.budget_date) = date_trunc('MONTH', CURRENT_TIMESTAMP)
+        """, nativeQuery = true)
     fun existsByUserIdAndBudgetTime(userId: UUID): Boolean
 
     @Query("""
-        SELECT b
+        SELECT *
         FROM Budget b 
-        WHERE b.user.id = :userId 
-            AND b.budgetTime >= FUNCTION('date_trunc', 'MONTH', CURRENT_TIMESTAMP) 
-            AND b.budgetTime < FUNCTION('date_trunc', 'MONTH', CURRENT_TIMESTAMP) + INTERVAL '1 month'
-        """)
+        WHERE b.user_id = :userId 
+            AND b.budget_date >= date_trunc('MONTH', CURRENT_TIMESTAMP) 
+            AND b.budget_date <  date_trunc('MONTH', CURRENT_TIMESTAMP + INTERVAL '1 month')
+        """, nativeQuery = true)
     fun findBudgetForCurrentMonth(userId: UUID): Budget?
-
-    @Query("select b from Budget b where b.user.id  = :userId and b.category = :category")
-    fun findAllByUserIdAAndCategory(userId : UUID, category: Category): List<Budget>
 
 }

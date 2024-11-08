@@ -23,12 +23,12 @@ interface TransactionRepository : JpaRepository<Transaction, TransactionPK> {
     fun findById(id: UUID): Transaction?
 
     @Query("""
-        select t
+        select *
         from Transaction t 
-        where t.user.id = :userId
-        AND t.pk.date >= FUNCTION('date_trunc', 'MONTH', CURRENT_TIMESTAMP) 
-        AND b.t.pk.date < FUNCTION('date_trunc', 'MONTH', CURRENT_TIMESTAMP) + INTERVAL '1 month'
-        """)
+        where t.user_id = :userId
+        AND t.date >= date_trunc('MONTH', CURRENT_TIMESTAMP) 
+        AND t.date < date_trunc('MONTH', CURRENT_TIMESTAMP + INTERVAL '1 month')
+        """, nativeQuery = true)
     fun findAllByUserIdForCurrentMonth(userId: UUID): List<Transaction>
 
     @Query("select t from Transaction t where t.pk.date >= :startDate and t.pk.date <= :endDate order by t.pk.date desc")

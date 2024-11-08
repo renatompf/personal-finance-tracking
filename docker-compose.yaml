@@ -11,6 +11,11 @@ services:
       - "5432:5432"
     networks:
       - my-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "root", "-d", "personal_finance_tracking_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
     container_name: app
@@ -23,7 +28,8 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
     depends_on:
-      - personal_finance_tracking_db
+      personal_finance_tracking_db:
+        condition: service_healthy
     ports:
       - "8080:8080"
     networks:

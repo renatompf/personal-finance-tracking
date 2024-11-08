@@ -30,7 +30,6 @@ class BudgetService(
 
         val budget = Budget(
             limit = budgetRequest.limit,
-            category = budgetRequest.category,
             user = user,
             budgetDate = Instant.now(),
         )
@@ -38,8 +37,7 @@ class BudgetService(
         val save = budgetRepository.save(budget)
 
         return BudgetOutDto(
-            limit = save.limit,
-            category = save.category,
+            limit = save.limit
         )
     }
 
@@ -52,7 +50,7 @@ class BudgetService(
 
         val totalSpending = transactions.sumOf { it.amount }
 
-        val remainingBudget = monthlyBudget.limit.subtract(totalSpending)
+        val remainingBudget = monthlyBudget.limit.subtract(totalSpending.abs())
 
         return RemainingBudgetDto(
             monthlyBudget.limit,

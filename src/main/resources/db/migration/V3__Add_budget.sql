@@ -2,7 +2,6 @@ CREATE TABLE budget
 (
     id          UUID           NOT NULL,
     "limit"     DECIMAL(10, 2) NOT NULL,
-    category    VARCHAR(50)    NOT NULL,
     budget_date  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     user_id     UUID           NOT NULL,
     CONSTRAINT pk_budget PRIMARY KEY (id)
