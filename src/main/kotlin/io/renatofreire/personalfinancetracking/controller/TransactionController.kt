@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
-import java.util.UUID
+import java.util.*
 
 @RestController
 @RequestMapping("/transactions")
@@ -44,11 +44,7 @@ class TransactionController(
 
     @GetMapping("/summary/monthly")
     fun getMonthlySummary(@AuthenticationPrincipal userDetails: UserDetails, @RequestParam(name = "category", required = false) category: Category?): ResponseEntity<List<TransactionMonthlySummaryDto>> {
-        return if (category == null) {
-            ResponseEntity.status(HttpStatus.OK).body(transactionService.getMonthlySummary(userDetails))
-        } else {
-            ResponseEntity.status(HttpStatus.OK).body(transactionService.getMonthlySummaryByCategory(userDetails, category))
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(transactionService.getMonthlySummary(userDetails, category))
     }
 
 }

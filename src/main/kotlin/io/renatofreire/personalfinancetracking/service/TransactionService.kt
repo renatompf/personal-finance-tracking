@@ -4,9 +4,7 @@ import io.renatofreire.personalfinancetracking.dto.summary.TransactionMonthlySum
 import io.renatofreire.personalfinancetracking.dto.transaction.TransactionInDto
 import io.renatofreire.personalfinancetracking.dto.transaction.TransactionOutDto
 import io.renatofreire.personalfinancetracking.enums.Category
-import io.renatofreire.personalfinancetracking.model.Transaction
-import io.renatofreire.personalfinancetracking.model.TransactionPK
-import io.renatofreire.personalfinancetracking.model.User
+import io.renatofreire.personalfinancetracking.model.*
 import io.renatofreire.personalfinancetracking.repository.BudgetRepository
 import io.renatofreire.personalfinancetracking.repository.TransactionMonthlySummaryRepository
 import io.renatofreire.personalfinancetracking.repository.TransactionRepository
@@ -17,10 +15,8 @@ import org.springframework.data.domain.Pageable
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 @Service
@@ -103,44 +99,41 @@ class TransactionService(
         transactionRepository.delete(transaction)
     }
 
-    fun getMonthlySummary(userDetails: UserDetails): List<TransactionMonthlySummaryDto> {
-        val user: User = userRepository.findByEmail(userDetails.username)
-            ?: throw EntityNotFoundException("User not found")
-
-        val monthlyTransactions = transactionMonthlySummaryRepository.findMonthlySummaryByUserId(user.id!!)
-
+    fun getMonthlySummary(userDetails: UserDetails, category: Category?): List<TransactionMonthlySummaryDto> {
+        val user: User = userRepository.findByEmail(userDetails.username) ?: throw EntityNotFoundException("User not found")
+        val monthlyTransactions = if (category == null || category == Category.ALL) {
+            transactionMonthlySummaryRepository.findMonthlySummaryByUserId(user.id!!)
+        } else {
+            transactionMonthlySummaryRepository.findMonthlySummaryByUserIdAndCategory(user.id!!, category)
+        }
         val monthlyBudgets = budgetRepository.findAllByUserId(user.id!!)
+        return summarizeMonthlyTransactions(monthlyTransactions, monthlyBudgets, category)
+    }
 
-        // (Limit + monthlyTransactions.getTotalIncome - monthlyTransactions.getTotalExpenses) for each month
-        val budgetMap = monthlyBudgets.groupBy { budget ->
+    private fun summarizeMonthlyTransactions(
+        transactions: List<TransactionMonthlySummary>,
+        budgets: List<Budget>,
+        category: Category?
+    ): List<TransactionMonthlySummaryDto> {
 
+        val budgetMap = budgets.groupBy { budget ->
             LocalDate.ofInstant(budget.budgetDate, ZoneId.of("UTC")).withDayOfMonth(1)
-        }.mapValues { budgets ->
-            // Sum of limits for the month
-            budgets.value.sumOf { it.limit }
+        }.mapValues { budget ->
+            budget.value.sumOf { it.limit }
         }
 
-        val summaryMap = monthlyTransactions.groupBy { transaction ->
-
+        val summaryMap = transactions.groupBy { transaction ->
             LocalDate.ofInstant(transaction.month, ZoneId.of("UTC")).withDayOfMonth(1)
-        }.mapValues { transactions ->
-            val totalIncome = transactions.value.sumOf { it.totalIncome ?: BigDecimal.ZERO }
-            val totalExpenses = transactions.value.sumOf { it.totalExpenses ?: BigDecimal.ZERO }
-
-            // Get the month from the first transaction in this group (using LocalDate to compare)
-            val month = LocalDate.ofInstant(transactions.value.firstOrNull()?.month, ZoneId.of("UTC")).withDayOfMonth(1)
-                ?: LocalDate.now() // Fallback to current month if no transactions
-
-            // Get the budget limit for the month (default to 0 if none found)
+        }.mapValues { transaction ->
+            val totalIncome = transaction.value.sumOf { it.totalIncome ?: BigDecimal.ZERO }
+            val totalExpenses = transaction.value.sumOf { it.totalExpenses ?: BigDecimal.ZERO }
+            val month = LocalDate.ofInstant(transaction.value.firstOrNull()?.month, ZoneId.of("UTC")).withDayOfMonth(1)
+                ?: LocalDate.now()
             val monthlyBudget = budgetMap[month] ?: BigDecimal.ZERO
-
-            // Calculate remaining budget
-            val remainingBudget = monthlyBudget + totalIncome - totalExpenses
-
-            // Return DTO
+            val remainingBudget = (monthlyBudget + totalIncome) - (totalExpenses.abs())
             TransactionMonthlySummaryDto(
                 month = month.atStartOfDay(ZoneId.of("UTC")).toInstant(),
-                category = Category.ALL,
+                category = category ?: Category.ALL,
                 totalIncome = totalIncome,
                 totalExpenses = totalExpenses,
                 remainingBudget = remainingBudget
@@ -149,47 +142,4 @@ class TransactionService(
 
         return summaryMap.values.toList()
     }
-
-
-    fun getMonthlySummaryByCategory(userDetails: UserDetails, category: Category): List<TransactionMonthlySummaryDto> {
-        val user: User = userRepository.findByEmail(userDetails.username)
-            ?: throw EntityNotFoundException("User not found")
-
-        // Retrieve monthly transactions
-        val transactionsByCategory = transactionMonthlySummaryRepository.findMonthlySummaryByUserIdAndCategory(user.id!!, category)
-
-        val budgetsByCategory = budgetRepository.findAllByUserId(user.id!!)
-            .groupBy { budget ->
-                budget.budgetDate.truncatedTo(ChronoUnit.MONTHS)
-            }.mapValues { budgets -> budgets.value.sumOf { it.limit } // Sum of limits for the month
-        }
-
-        val summaryMap = transactionsByCategory.groupBy { transaction ->
-            transaction.month?.truncatedTo(ChronoUnit.MONTHS) // Group by month
-        }.mapValues { transactions ->
-            val totalIncome = transactions.value.sumOf { it.totalIncome ?: BigDecimal.ZERO }
-            val totalExpenses = transactions.value.sumOf { it.totalExpenses ?: BigDecimal.ZERO }
-
-            // Get the month from the first transaction in this group
-            val month = transactions.value.firstOrNull()?.month ?: Instant.now()
-
-            // Get the budget limit for the month (default to 0 if none found)
-            val monthlyBudget = budgetsByCategory[month] ?: BigDecimal.ZERO
-
-            // Calculate remaining budget
-            val remainingBudget = monthlyBudget + totalIncome - totalExpenses
-
-            TransactionMonthlySummaryDto(
-                month = month,
-                category = category,
-                totalIncome = totalIncome,
-                totalExpenses = totalExpenses,
-                remainingBudget = remainingBudget
-            )
-        }
-
-        // Return a list of summary DTOs
-        return summaryMap.values.toList()
-    }
-
 }
